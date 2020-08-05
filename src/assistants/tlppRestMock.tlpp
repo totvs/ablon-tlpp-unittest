@@ -1,0 +1,44 @@
+#include "tlpp-core.th"
+namespace tunittest.assistant
+
+class TlppRestMock 
+    public data statusCode
+    public data faultMessage
+    public data body
+    public data response
+    public method new()
+    public method getBodyRequest()
+    public method setFault()
+    public method setStatusCode()
+    public method getStatusCode()
+    public method setResponse()
+    public method getResponse()
+    static method createPostRequest(body)
+endclass
+
+method new() class TlppRestMock 
+
+return
+method createPostRequest(body) class TlppRestMock 
+    public oRest := TlppRestMock():new()
+    oRest:body := body
+return
+
+method getResponse() class TlppRestMock  
+return self:response
+
+method setResponse(response) class TlppRestMock 
+    self:response := response
+return
+method getBodyRequest() class TlppRestMock 
+return self:body
+
+method setFault(cMsg) class TlppRestMock 
+    self:faultMessage := cMsg
+return
+
+method setStatusCode(nCode) class TlppRestMock 
+    self:statusCode := nCode
+return
+method getStatusCode()  class TlppRestMock     
+return self:statusCode

@@ -1,0 +1,4 @@
+@annotation Test 
+  description     as char     default ""
+  throwException as logical default .f.
+@end

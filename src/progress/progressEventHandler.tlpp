@@ -1,0 +1,30 @@
+#include "tlpp-core.th"
+namespace tunittest.progress
+
+class ProgressEventHandler
+    data jEvents 
+
+    public method new()
+    public method addEvent(cId as character, oEvent as Object)
+    public method fire(jProgress)
+    public method getEvent(cid as character)
+endclass
+
+method new() class ProgressEventHandler
+    self:jEvents  := JsonObject():new()
+return
+method getEvent(cid as character) class ProgressEventHandler
+return self:jEvents[cid]
+
+method addEvent(cId as character, oEvent as Object) class ProgressEventHandler
+    self:jEvents[cId] := oEvent
+return
+
+method fire(jProgress) class ProgressEventHandler
+    local nx
+    local aEvents := self:jEvents:GetNames()     
+    for nx := 1 to len (aEvents)
+        self:jEvents[aEvents[nX]]:Fire(jProgress)
+    next nx
+    aEvents := aSize(aEvents,0)
+return

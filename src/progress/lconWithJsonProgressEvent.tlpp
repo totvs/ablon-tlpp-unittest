@@ -1,0 +1,75 @@
+#include "tlpp-core.th"
+namespace tunittest.progress
+static __ohIgnoredSources := __initIgnored()
+class LconWithJsonProgressEvent from ProgressEvent
+    private data jresult
+    public method new()
+    public method fire(aCoverage)
+    public method getResult()
+    
+endclass
+static function __initIgnored()
+    __ohIgnoredSources := JsonObject():new()
+    //Adicionar aqui todos os fontes que nao sera gerado coverage
+    __ohIgnoredSources["TUNITTEST.PROGRESS.LCONWITHJSONPROGRESSEVENT"] := .T.
+return
+method new() class LconWithJsonProgressEvent
+    self:jresult := JsonObject():new()
+    
+return
+method getResult() class LconWithJsonProgressEvent
+return self:jresult
+
+method fire(aCoverage) class LconWithJsonProgressEvent
+    local nLenght as Numeric
+    local nPos as Numeric    
+    local jLcovp := JsonObject():new()
+    local jSF
+    local nInstrumentedLines := 0
+    local nNonZeroLines := 0
+
+    
+    jLcovp['TNs'] := {}
+    nLenght := len(aCoverage) 
+    for nPos := 1 to nLenght
+        /*if (__ohIgnoredSources[aCoverage[nPos][1]])
+            loop
+        endif  */      
+        nInstrumentedLines := 0
+        nNonZeroLines := 0
+        jSF := JsonObject():new()
+        jSF["SF"] := aCoverage[nPos][1]
+        jSF["lines"] := lineToCover(aCoverage[nPos][2],@nInstrumentedLines,@nNonZeroLines)
+        jSF["LH"] :=  cValToChar(nNonZeroLines)
+        jSF["LF"] := cValToChar(nInstrumentedLines)
+        aAdd(jLcovp['TNs'] ,jSF)
+    next nPos
+    self:jresult := jLcovp
+    conout(jLcovp:toJson())
+return
+
+static function lineToCover(aLines,nInstrumentedLines,nNonZeroLines) 
+    local aJsonLines := {}
+    local nLenght as numeric
+    local nX
+    local nExecCount
+    local jItem
+    nLenght := Len(aLines) 
+    
+
+    For nX := 1 to nLenght
+        nExecCount := aLines[nX]
+        If nExecCount >= 0
+            nInstrumentedLines++
+            nNonZeroLines++
+            jItem := JsonObject():new()
+            jItem["DA"] := cValToChar(nX)
+            jItem["hits"] := cValToChar(aLines[nX])            
+            aAdd(aJsonLines,jItem)
+        ElseIf nExecCount == 0
+            nInstrumentedLines++
+        EndIf
+    Next nX    
+   
+    
+return aJsonLines

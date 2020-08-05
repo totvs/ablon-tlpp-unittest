@@ -1,0 +1,213 @@
+#include "tlpp-core.th"
+namespace tunittest.core
+using namespace tunittest.progress
+class TestEngine 
+    private data lCoverage
+    private data aCoverage
+    private data oAssert
+    private data oProgressEventHandler
+    private data oCoverageEventHandler
+    private data jProgressInfo
+
+    public method new()
+    public method enableCoverage()
+    public method executeTestFunction(cFunctionName as character)
+    public method runTestsByFile(cFileName as character)
+    public method runTestsFunction(cFileName as character, cFunction as character)
+    public method getProgress(ckey as character)
+    public method getCoverage(ckey as character) 
+    public method catchError(oError as object,lErrorExpected as logical)
+    public method addProgress()
+    public method addCoverage()
+    private method startCoverageIfEnable()
+    private method stopCoverageIfEnable()
+    
+    private method fireProgress()
+    
+endclass 
+method new() class TestEngine
+    self:aCoverage := {}
+    self:lCoverage := .f.
+    self:oAssert := Assert():new()
+    self:jProgressInfo := JsonObject():New()
+    self:oCoverageEventHandler := ProgressEventHandler():new()
+    
+    self:oProgressEventHandler := ProgressEventHandler():new()
+    self:oProgressEventHandler:addEvent("console",ConsoleProgressEvent():new())
+return
+method addProgress(cKey, oEvent) class TestEngine 
+    self:oProgressEventHandler:addEvent(cKey, oEvent)
+return
+method addCoverage(cKey, oEvent) class TestEngine 
+    self:oCoverageEventHandler:addEvent(cKey, oEvent)
+return
+method enableCoverage() class TestEngine 
+    self:lCoverage := .T.
+return
+method getProgress(ckey as character) class TestEngine 
+return self:oProgressEventHandler:getEvent(ckey)
+
+method getCoverage(ckey as character) class TestEngine 
+return self:oCoverageEventHandler:getEvent(ckey)
+
+method runTestsByFile(cFileName as Character) class TestEngine 
+    local aFunctionToTest
+    local nx
+    local nCount
+    local jFunctionAnnotationInfo
+    local lok := .f.
+    aFunctionToTest := Reflection.getProgramFunctionsByAnnotation(cFileName,"test") 
+    if !empty(aFunctionToTest)        
+        nCount := Len(aFunctionToTest)
+        
+        self:jProgressInfo["source"] := cFileName
+        self:jProgressInfo["tests"] := nCount
+        self:jProgressInfo["current"] := JsonObject():new()
+        for nx := 1 to nCount
+            jFunctionAnnotationInfo := Reflection.getFunctionAnnotation(cFileName,aFunctionToTest[nx],"test")
+            self:jProgressInfo["current"]["count"] := nX
+            self:jProgressInfo["current"]["function"] := aFunctionToTest[nx]
+            self:jProgressInfo["current"]["AnnotationInfo"] := jFunctionAnnotationInfo
+            self:executeTestFunction(aFunctionToTest[nx])
+        next nx
+        aFunctionToTest := aSize(aFunctionToTest,0)
+        lok := .t.
+        self:oCoverageEventHandler:fire(self:aCoverage)
+    endif
+return lok
+method runTestsFunction(cFileName as character, cFunction as character) class TestEngine
+local aFunctionToTest
+    local nx    
+    local jFunctionAnnotationInfo
+    local lok := .f.
+    aFunctionToTest := Reflection.getProgramFunctionsByAnnotation(cFileName,"test") 
+    if !empty(aFunctionToTest)
+        self:oProgressEventHandler:addEvent("json",JsonProgressEvent():new(cFileName))
+        self:jProgressInfo["source"] := cFileName
+        self:jProgressInfo["tests"] := 1
+        self:jProgressInfo["current"] := JsonObject():new()
+        
+        jFunctionAnnotationInfo := Reflection.getFunctionAnnotation(cFileName,cFunction,"test")
+        if (jFunctionAnnotationInfo != Nil)
+            self:jProgressInfo["current"]["count"] := nX
+            self:jProgressInfo["current"]["function"] := aFunctionToTest[nx]
+            self:jProgressInfo["current"]["AnnotationInfo"] := jFunctionAnnotationInfo
+            self:executeTestFunction(aFunctionToTest[nx])
+            lok := .t.        
+        endif
+        aFunctionToTest := aSize(aFunctionToTest,0)        
+    endif
+return lok
+
+method executeTestFunction(cFunctionName as Character) class TestEngine     
+    local lErrorCaught := .F.
+    local lErrorExpected := self:jProgressInfo["current"]["AnnotationInfo"]["throwException"]
+    local oErrorBlock := ErrorBlock({|oError| self:catchError(oError,lErrorExpected), lErrorCaught := .T., Break(oError) })
+    self:startCoverageIfEnable()                
+        
+        self:jProgressInfo["current"]["start"] := seconds()    
+        Begin Sequence
+            testFunctionCall(cFunctionName)
+        Recover
+			//Implementar o recover aqui
+		End Sequence
+        self:stopCoverageIfEnable()
+        ErrorBlock( oErrorBlock )
+        //Esperava dar exception mais não deu
+        if (lErrorExpected .and. !lErrorCaught )
+            self:oAssert:putResult(.f., "Expected exception was not thrown.", upper(self:jProgressInfo["source"]), self:jProgressInfo["current"]["function"] )
+        endif
+        self:fireProgress()
+        
+    
+return
+
+/*method fireProgressStart() class TestEngine     
+    self:jProgressInfo["current"]["start"] := seconds()
+    self:oProgressEventHandler:fire(self:jProgressInfo)
+return*/
+method fireProgress() class TestEngine     
+    local jResult
+    self:jProgressInfo["current"]["stop"] := seconds()    
+    jResult := self:oAssert:getResult(Upper(self:jProgressInfo["source"]),Upper(self:jProgressInfo["current"]["function"]))
+    self:jProgressInfo["current"]["result"] := jResult
+    self:oProgressEventHandler:fire(self:jProgressInfo)    
+return
+
+method startCoverageIfEnable() class TestEngine 
+    if (self:lCoverage)
+        PtInternal( 12 , "ON" )
+    endif
+return
+
+method stopCoverageIfEnable() class TestEngine 
+    local aTmp
+    if Self:lCoverage
+	    aTmp := PtInternal( 12 , "COVERAGE" )
+	    PtInternal( 12 , "OFF")
+        //conout("Coverga Dump")
+        printArray(aTmp)
+        If (empty(self:aCoverage))
+            self:aCoverage := aTmp
+        Else
+            Merge(@self:aCoverage,aTmp)
+        Endif
+        //aTmp := aSize(aTmp,0)
+    endif
+
+return
+method catchError(oError as object, lExpected as logical ) class TestEngine
+
+	Local cMsg := "Error Log:" + Iif(oError != Nil, oError:ErrorStack,"")
+    
+    self:oAssert:putResult(lExpected, cMsg, upper(self:jProgressInfo["source"]), self:jProgressInfo["current"]["function"] )
+return
+
+
+Return
+static function testFunctionCall(cFunctionName as Character)
+    &cFunctionName.()
+return
+
+static function Merge(aOrigem,aNovo)
+    local nSource
+    local nLine
+    local nPosNovo
+    local aOriLines
+    local aNovoLines
+    local nPosOri
+    local nMaxLines
+    for nSource := 1 to Len(aOrigem)
+        nPosNovo := aScan(aNovo, {|x| x[1] == aOrigem[nSource][1]})
+        if nPosNovo > 0  //Caso seja 0 é pq no novo não tem esse fonte
+            aOriLines  := aOrigem[nSource][2]
+            aNovoLines := aNovo[nPosNovo][2]
+            nMaxLines := Len(aNovoLines) 
+            for nLine := 1 to Len(aOriLines) 
+                if(nLine <= nMaxLines .and. aOriLines[nLine] != aNovoLines[nLine])
+                    aOriLines[nLine] := Max(aOriLines[nLine], aNovoLines[nLine])
+                endif
+            next nLine
+        endif
+    next nSource
+    for nSource := 1 to Len(aNovo)
+        nPosOri := aScan(aOrigem, {|x| x[1] == aNovo[nSource][1]})
+        if nPosOri == 0
+            aAdd(aOrigem,aClone(aNovo[nSource]))
+        endif
+    next nSource
+return
+
+static function printArray(aEntry,cPai)
+local nX
+local clocalPai
+default cPai := "Array->"
+for nx := 1 to len(aEntry)
+    clocalPai := cPai +"[" + cValTochar(nx) + "]"
+    if valtype(aEntry[nx]) =="A"
+        printarray(aEntry[nx],clocalPai)
+    else 
+        conout( clocalPai + "=" + cValTochar(aEntry[nx]))
+    endif
+next
+return

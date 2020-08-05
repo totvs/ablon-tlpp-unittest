@@ -1,0 +1,26 @@
+#include "tlpp-core.th"
+namespace tunittest.main
+using namespace tunittest.progress
+user function executeTestByFile(cFileName as character,cCoverageType as character)
+    local oEngine
+    local oProgress
+    local oJson
+    local cResult
+    local oCoverage
+    local jCoverage
+    default cCoverageType := "lcov"
+    oEngine := tunittest.core.TestEngine():new()
+    oEngine:enableCoverage()
+    oEngine:addCoverage("lcov",LconWithJsonProgressEvent():new())
+    oEngine:addProgress("json",JsonProgressEvent():new(cFileName))
+    if oEngine:runTestsByFile(cFileName)
+        oProgress := oEngine:getProgress("json") 
+        oJson := oProgress:getResult()
+
+        oCoverage := oEngine:getCoverage(cCoverageType)
+        jCoverage := oCoverage:getResult()
+        oJson['lcov'] := jCoverage
+        cResult := oJson:toJSON()
+    endif
+    
+return cResult

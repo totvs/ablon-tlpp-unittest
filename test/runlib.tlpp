@@ -1,0 +1,8 @@
+#include 'tlpp-core.th'
+namespace tlpp.test
+//tlpp.test.u_runlib
+function u_runlib()
+
+tunittest.main.u_executeTestByFile("test-simple.spec.tlpp")
+
+return

@@ -1,0 +1,91 @@
+#include "tlpp-core.th"
+namespace tunittest.core
+static __oinstance := nil
+//-------------------------------------------------------------------
+/*/{Protheus.doc} function
+description
+@author  Rodrigo Antonio
+
+/*/
+//-------------------------------------------------------------------
+class Assert
+    data jResults
+    public method new()
+    public method putResult()
+    public method getResult(cSource,cFunction)
+    static method getInstance() as Object
+    static method isTrue(condition as logical, message as character)
+    static method isFalse(condition as logical, message as character)
+    static method areEqual(expected, actual, message as character)
+    static method isEmpty(xValue, message as character)
+    
+endclass
+method new() class Assert
+    if (__oinstance == Nil)
+        __oinstance := self
+        self:jResults := JsonObject():new()
+    else
+        UserException("Too many Asserts")
+    endif
+return
+
+method getInstance() class Assert
+
+return  __oinstance
+method putResult(lSuccess as logical, message as character, cSource as character, cfunction as character) class Assert    
+    local jNewResult
+    local cKey
+    default cSource := ProcSource(2)
+    default cfunction := ProcName(2)
+    //default lExceptionIsExpected := .f.
+    cKey := cSource+cfunction
+    jNewResult := JsonObject():new()
+    jNewResult["success"] := lSuccess
+    jNewResult["message"] := message
+    //jNewResult["lExceptionIsExpected"] := lExceptionIsExpected
+    __oinstance:jResults[cKey] := jNewResult
+return 
+
+method getResult(cSource,cFunction) class Assert    
+    local jResult :=  __oinstance:jResults[cSource+cfunction]
+    if (jResult == Nil)
+        self:putResult(.F.,"No assert to this test.",cSource,cfunction)
+        jResult :=  __oinstance:jResults[cSource+cfunction]
+    endif
+return jResult
+
+
+method isTrue(condition as logical, message as character) class Assert
+    default message := "Expected true"
+    __oinstance:putResult(condition,message)
+return
+
+method isFalse(condition as logical, message as character) class Assert
+    default message := "Expected false"
+    __oinstance:putResult(!condition,message)
+return
+
+method isEmpty(xValue, message as character) class Assert
+	default message := "Expected empty"	
+    __oinstance:putResult(empty(xvalue),message)
+return
+
+method AreEqual(expected, actual,message as character) class Assert
+    local typeExpected := valtype( expected)
+    local typeActual := valtype( actual)    
+    local lEqual
+    default message := ""
+    if (typeActual == typeExpected)
+        if typeActual $ "CNDL" 
+            lEqual := (expected == actual)
+        else
+            UserException("Type is not valid.")
+        endif
+    else
+        lEqual := .F.
+    endif
+    if empty(message)        
+        message := "Expected that '" + cValtoChar(expected) + "' should be equals to '" + cValtoChar(actual) + "'"        
+    endif
+    __oinstance:putResult(lEqual,message)
+return

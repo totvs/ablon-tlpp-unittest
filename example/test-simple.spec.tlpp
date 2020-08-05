@@ -1,0 +1,37 @@
+#include "test.th"
+
+using namespace tunittest.core
+@test("Teste simples. afrimacao de soma correta" )
+function mytlpptest0()
+ablon.example.cov_test()
+Assert():AreEqual(ablon.example.soma(2,3),5)
+return
+
+@test("Teste simples. afrimacao errada" )
+function mytlpptest1()
+sleep(300)
+conout("Sou um teste")
+Assert():AreEqual(2,3)
+return
+
+@test("Eu sou outro Teste, eu estou correto")
+function mytlpptest2()
+conout("Sou um teste")
+Assert():AreEqual(3,3)
+return
+
+@test("Eu sou outro Teste, esquesi o assert")
+function mytlpptest3()
+conout("Sou um teste")
+//Assert():AreEqual(3,3)
+return
+
+@test(description = "Teste de Exception-Esperada" ,throwException= .t. )
+function mytlpptestexcpexperada()
+UserException("Pega essa")
+return
+
+@test("Teste de Exception-inesperada"  )
+function mytlpptestexcpinsp()
+UserException("fiz coisa errada")
+return

@@ -1,0 +1,7 @@
+#include "tlpp-core.th"
+namespace tunittest.progress
+
+class ProgressEvent   
+    public method new()
+    public method fire(xValue)
+endclass

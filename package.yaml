@@ -1,0 +1,17 @@
+name: ablon-tlpp-unittest
+version: 0.0.1
+synopsis: Simplest and Lightest unit test framework for TLPP
+maintainer: Rodrigo Antonio Godinho <rodrigo.antonio@totvs.com.br>
+license: MIT
+repository: https://code.engpro.totvs.com.br/engpro/
+category: test
+type: source
+
+exposed-includes:
+
+library:
+    source-dirs: src
+tests:
+    source-dirs: test
+    dependencies: tlpp-core
+        

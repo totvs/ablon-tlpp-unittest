@@ -1,0 +1,37 @@
+#include "tlpp-core.th"
+namespace tunittest.progress
+
+class ConsoleProgressEvent from ProgressEvent
+
+    public method new()
+    public method fire(jInfo)
+    private method writeLog()
+endclass
+
+method new() class ConsoleProgressEvent
+
+
+return
+
+method writeLog(clog)  class ConsoleProgressEvent
+    conout ("[T-UNIT-TEST]" + clog  )
+return
+method fire(jProgress) class ConsoleProgressEvent
+    local cLog 
+    local lSuccess    
+    local nExecTime 
+    nExecTime := jProgress["current"]["stop"] - jProgress["current"]["start"]
+    
+        cLog := "[" + jProgress["source"] + "][" + jProgress["current"]["function"]+ "]["
+        cLog += jProgress["current"]["AnnotationInfo"]["description"]
+        cLog += "][Exec time:" + cValToChar(nExecTime)+ "]"
+        cLog += "[" + jProgress["source"] + "][" + jProgress["current"]["function"]+"] " 
+        lSuccess := jProgress["current"]["result"]["success"]
+        cLog += iif(lSuccess, "test successfully completed.", "test finished with FAILURE.")
+        if (!lSuccess)
+            cLog += "[" + jProgress["current"]["result"]["message"] + "]"
+        endif
+    
+    self:writeLog(cLog)
+return
+

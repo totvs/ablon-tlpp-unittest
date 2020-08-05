@@ -1,0 +1,31 @@
+#include "tlpp-core.th"
+namespace tunittest.progress
+
+class JsonProgressEvent from ProgressEvent
+    private data jresult
+    public method new(cFileName as character)
+    public method fire(jInfo)
+    public method getResult()
+    
+endclass
+
+method new(cFileName as character) class JsonProgressEvent
+    self:jresult := JsonObject():new()
+    self:jresult["tests"] := JsonObject():new()
+    self:jresult["tests"]["className"] := cFileName	
+	self:jresult["tests"]["methods"] := {}
+    self:jresult["tests"]["runned"] := .t.
+return
+method getResult() class JsonProgressEvent
+return self:jresult
+
+method fire(jProgress) class JsonProgressEvent
+    local item := JsonObject():new()
+    item["success"] := jProgress["current"]["result"]["success"]
+    item["methodname"] := jProgress["current"]["function"]
+    item["message"] := jProgress["current"]["result"]["message"]
+    item["line"] := -1
+	item["skiped"] := .f.
+    item["elapsedTime"] := jProgress["current"]["stop"] - jProgress["current"]["start"]
+    aAdd(self:jresult["tests"]["methods"],item)
+return

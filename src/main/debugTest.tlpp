@@ -1,0 +1,16 @@
+#include "tlpp-core.th"
+namespace tunittest.main
+//tunittest.main.u_testDebug
+user function testDebug(cFileName as character,cFunctionName as character)
+    local oEngine
+    local oProgress
+    local oJson
+    local cResult
+    oEngine := tunittest.core.TestEngine():new()
+    if oEngine:runTestsByFile(cFileName)
+        oProgress := oEngine:getProgress("json")
+        oJson := oProgress:getResult()
+        cResult := oJson:toJSON()
+    endif
+    
+return cResult
