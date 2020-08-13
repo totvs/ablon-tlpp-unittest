@@ -7,10 +7,6 @@ user function testDebug(cFileName as character,cFunctionName as character)
     local oJson
     local cResult
     oEngine := tunittest.core.TestEngine():new()
-    if oEngine:runTestsByFile(cFileName)
-        oProgress := oEngine:getProgress("json")
-        oJson := oProgress:getResult()
-        cResult := oJson:toJSON()
-    endif
+    oEngine:runTestsByFile(cFileName)
     
-return cResult
+return 

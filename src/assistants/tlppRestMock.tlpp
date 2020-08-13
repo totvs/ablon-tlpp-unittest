@@ -6,14 +6,40 @@ class TlppRestMock
     public data faultMessage
     public data body
     public data response
+    public data pathParam
+    public data queryRequest
+    public data headerRequest
+    public data headerReponse
+    public data fullURLRequest
+    public data methodName
     public method new()
-    public method getBodyRequest()
+    
     public method setFault()
-    public method setStatusCode()
-    public method getStatusCode()
+    public method setStatusCode()    
     public method setResponse()
+    public method setPathParamsRequest()
+    public method setQueryRequest()
+    public method setHeaderRequest()
+    public method setHeaderResponse()
+    public method setFullURLRequest()
+    public method setMethodRequest()
+
+    public method getMethodRequest()
+    public method getHeaderRequest()
+    public method getHeaderResponse()
+    public method getFullURLRequest()
+
+    public method getBodyRequest()
     public method getResponse()
-    static method createPostRequest(body)
+    public method getStatusCode()
+    public method getPathParamsRequest()
+    public method getQueryRequest()
+
+    static method createRequest()
+    static method createPostRequest()
+    static method createGetRequest()
+    static method createPutRequest()
+    static method createDeleteRequest()
 endclass
 
 method new() class TlppRestMock 
@@ -22,6 +48,24 @@ return
 method createPostRequest(body) class TlppRestMock 
     public oRest := TlppRestMock():new()
     oRest:body := body
+    oRest:methodName := "POST"
+return
+method createGetRequest() class TlppRestMock 
+    public oRest := TlppRestMock():new()    
+    oRest:methodName := "GET"
+return
+method createPutRequest(body) class TlppRestMock 
+    public oRest := TlppRestMock():new()
+    oRest:body := body
+    oRest:methodName := "PUT"
+return
+method createDeleteRequest() class TlppRestMock 
+    public oRest := TlppRestMock():new()    
+    oRest:methodName := "DELETE"
+return
+
+method createRequest() class TlppRestMock 
+    public oRest := TlppRestMock():new()    
 return
 
 method getResponse() class TlppRestMock  
@@ -29,6 +73,7 @@ return self:response
 
 method setResponse(response) class TlppRestMock 
     self:response := response
+    self:statusCode := 200
 return
 method getBodyRequest() class TlppRestMock 
 return self:body
@@ -42,3 +87,40 @@ method setStatusCode(nCode) class TlppRestMock
 return
 method getStatusCode()  class TlppRestMock     
 return self:statusCode
+method setPathParamsRequest(jpathParam) class TlppRestMock     
+self:pathParam := jpathParam
+return
+method getPathParamsRequest() class TlppRestMock     
+return self:pathParam
+
+method setQueryRequest(query) class TlppRestMock     
+self:queryRequest := query
+return
+
+method getQueryRequest() class TlppRestMock     
+return self:queryRequest
+
+
+
+method getHeaderRequest() class TlppRestMock
+return self:headerRequest
+method getHeaderResponse() class TlppRestMock
+return self:headerReponse
+method getFullURLRequest() class TlppRestMock
+return self:fullURLRequest
+
+method setHeaderRequest(header) class TlppRestMock
+self:headerRequest := header
+return
+method setHeaderResponse(header) class TlppRestMock
+self:headerReponse := header
+return
+method setFullURLRequest(fullUrlReq) class TlppRestMock
+self:fullURLRequest := fullUrlReq
+return
+
+method setMethodRequest(methodName) class TlppRestMock
+self:methodName := methodName    
+return
+method getMethodRequest() class TlppRestMock
+return self:methodName
